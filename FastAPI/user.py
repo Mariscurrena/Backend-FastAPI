@@ -45,7 +45,7 @@ async def users():
     #return User(name="Angel", surname="Mariscurrena", url="https://mariscurrena.github.io/Portfolio-AM/", age=24) #Instance for an specific user using User's class
     return users_list
 
-
+### Call from path
 ### This block allows calling search function from path or form query equaly
 @app.get("/user/{id}")
 async def user(id: int):
@@ -65,4 +65,32 @@ def search_user(id: int):
     except:
         return {"error": "User has not been found"}
     
-##
+### (Example) Combining Path and Query parameters
+# @app.get("/userpq/{id}")
+# async def userpq(id: int, name: str):
+#     users = filter(lambda user: user.id == id and user.name == name, users_list)
+#     try:
+#         return list(users)[0]
+#     except:
+#         return {"error": "User has not been found"}
+
+###### POST Request
+@app.post("/user/")
+async def user(user: User):
+    if type(search_user(user.id)) == User: ### Input validation for existing users
+        return {"error": "User already exists"}
+    else:
+        users_list.append(user)
+#### POST Data example
+# {
+#   "id":4, 
+#   "name":"Elizabeth", 
+#   "surname":"Cercado", 
+#   "url":"https://mariscurrena.github.io/Portfolio-AM/", 
+#   "age":47
+# }
+
+
+###### PUT Request
+# @app.post("/user/")
+# async def user(user: User):
