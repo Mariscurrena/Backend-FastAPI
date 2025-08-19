@@ -48,4 +48,7 @@ async def users():
 @app.get("/user/{id}")
 async def user(id: int):
     users = filter(lambda user: user.id == id, users_list) #Filter = Superior order function
-    return list(users) ## Return a list with the filter function using lambda function results
+    try: ## Handles errors for unexisting users
+        return list(users)[0] ## Return a list with the filter function using lambda function results, just the first element of the list (object)
+    except:
+        return {"error": "User has not been found"}
