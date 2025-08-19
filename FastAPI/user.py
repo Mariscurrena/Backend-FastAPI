@@ -75,7 +75,7 @@ def search_user(id: int):
 #         return {"error": "User has not been found"}
 
 ###### POST Request
-@app.post("/user/",status_code=201)
+@app.post("/user/",response_model=User, status_code=201) ##Response model for indicate what's the expected type of result
 async def user(user: User):
     if type(search_user(user.id)) == User: ### Input validation for existing users
         raise HTTPException(status_code=204, detail="User already exists") ### No content
@@ -93,7 +93,7 @@ async def user(user: User):
 
 
 ###### PUT Request
-@app.put("/user/",)
+@app.put("/user/", response_model=User, status_code=202)
 async def user(user: User):
     ### Basic programming
     found = False ## Initial logic condition
