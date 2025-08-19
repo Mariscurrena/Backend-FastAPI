@@ -1,4 +1,4 @@
-from fastapi import FastAPI
+from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel
 
 app = FastAPI()
@@ -75,10 +75,10 @@ def search_user(id: int):
 #         return {"error": "User has not been found"}
 
 ###### POST Request
-@app.post("/user/")
+@app.post("/user/",status_code=201)
 async def user(user: User):
     if type(search_user(user.id)) == User: ### Input validation for existing users
-        return {"error": "User already exists"}
+        raise HTTPException(status_code=204, detail="User already exists") ### No content
     else:
         users_list.append(user)
         return user
@@ -93,7 +93,7 @@ async def user(user: User):
 
 
 ###### PUT Request
-@app.put("/user/")
+@app.put("/user/",)
 async def user(user: User):
     ### Basic programming
     found = False ## Initial logic condition
@@ -103,13 +103,13 @@ async def user(user: User):
             found = True ## Logic condition changed
 
     if not found: ## If logic condition not changed, user was not modified
-        return {"error": "User has not been updated"}
+        raise HTTPException(status_code=409, detail="User has not been updated")
     else:
         return user
     
 
 ###### DELETE Request
-@app.delete("/user/{id}")
+@app.delete("/user/{id}", status_code=202)
 async def user(id: int):
     found = False
     for index, saved_user in enumerate(users_list): ## Looking for user
@@ -118,6 +118,6 @@ async def user(id: int):
             found = True ## Logic condition changed
 
     if not found:
-        return {"error": "User has not been deleted"}
+        raise HTTPException(status_code=409, detail="User has not been deleted")
     else:
         return {"warning": "User was deleted"}
