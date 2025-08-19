@@ -81,6 +81,7 @@ async def user(user: User):
         return {"error": "User already exists"}
     else:
         users_list.append(user)
+        return user
 #### POST Data example
 # {
 #   "id":4, 
@@ -92,5 +93,16 @@ async def user(user: User):
 
 
 ###### PUT Request
-# @app.post("/user/")
-# async def user(user: User):
+@app.put("/user/")
+async def user(user: User):
+    ### Basic programming
+    found = False ## Initial logic condition
+    for index, saved_user in enumerate(users_list): ## Looking for user
+        if saved_user.id == user.id: ## If condition meets
+            users_list[index] = user ## User is updated
+            found = True ## Logic condition changed
+
+    if not found: ## If logic condition not changed, user was not modified
+        return {"error": "User has not been updated"}
+    else:
+        return user
