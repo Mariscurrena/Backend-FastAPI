@@ -45,10 +45,24 @@ async def users():
     #return User(name="Angel", surname="Mariscurrena", url="https://mariscurrena.github.io/Portfolio-AM/", age=24) #Instance for an specific user using User's class
     return users_list
 
+
+### This block allows calling search function from path or form query equaly
 @app.get("/user/{id}")
 async def user(id: int):
+    return search_user(id)
+    
+### Call from query
+### Initialize a parameter from URL with "?" operator
+@app.get("/user/")
+async def user(id: int):
+    return search_user(id)
+    
+### Reusable function for API endpoints "user" and "userquery"
+def search_user(id: int):
     users = filter(lambda user: user.id == id, users_list) #Filter = Superior order function
     try: ## Handles errors for unexisting users
         return list(users)[0] ## Return a list with the filter function using lambda function results, just the first element of the list (object)
     except:
         return {"error": "User has not been found"}
+    
+##
