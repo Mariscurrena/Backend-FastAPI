@@ -1,7 +1,7 @@
-from fastapi import FastAPI, HTTPException
+from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel
 
-app = FastAPI()
+router = APIRouter(tags=["Users"])
 
 ### With FastAPI and pydantic is possible create an Object and use it instead direct JSON
 class User(BaseModel): ###Base Model helps to create an entity without needing define constructors like in a conventional class
@@ -17,7 +17,7 @@ users_list = [User(id=1, name="Angel", surname="Mariscurrena", url="https://mari
               User(id=3, name="Emilio", surname="Mariscurrena", url="https://mariscurrena.github.io/Portfolio-AM/", age=12)] ### Creates instances of User class
 
 ###Example of how to work directly with JSON, not the best option in a OOP language
-@app.get("/usersjson")
+@router.get("/usersjson")
 async def usersjson():
     return [
         {
@@ -40,20 +40,20 @@ async def usersjson():
         }
     ]
 
-@app.get("/users")
+@router.get("/users")
 async def users():
     #return User(name="Angel", surname="Mariscurrena", url="https://mariscurrena.github.io/Portfolio-AM/", age=24) #Instance for an specific user using User's class
     return users_list
 
 ### Call from path
 ### This block allows calling search function from path or form query equaly
-@app.get("/user/{id}")
+@router.get("/user/{id}")
 async def user(id: int):
     return search_user(id)
     
 ### Call from query
 ### Initialize a parameter from URL with "?" operator
-@app.get("/user/")
+@router.get("/user/")
 async def user(id: int):
     return search_user(id)
     
@@ -66,7 +66,7 @@ def search_user(id: int):
         return {"error": "User has not been found"}
     
 ### (Example) Combining Path and Query parameters
-# @app.get("/userpq/{id}")
+# @router.get("/userpq/{id}")
 # async def userpq(id: int, name: str):
 #     users = filter(lambda user: user.id == id and user.name == name, users_list)
 #     try:
@@ -75,7 +75,7 @@ def search_user(id: int):
 #         return {"error": "User has not been found"}
 
 ###### POST Request
-@app.post("/user/",response_model=User, status_code=201) ##Response model for indicate what's the expected type of result
+@router.post("/user/",response_model=User, status_code=201) ##Response model for indicate what's the expected type of result
 async def user(user: User):
     if type(search_user(user.id)) == User: ### Input validation for existing users
         raise HTTPException(status_code=204, detail="User already exists") ### No content
@@ -93,7 +93,7 @@ async def user(user: User):
 
 
 ###### PUT Request
-@app.put("/user/", response_model=User, status_code=202)
+@router.put("/user/", response_model=User, status_code=202)
 async def user(user: User):
     ### Basic programming
     found = False ## Initial logic condition
@@ -109,7 +109,7 @@ async def user(user: User):
     
 
 ###### DELETE Request
-@app.delete("/user/{id}", status_code=202)
+@router.delete("/user/{id}", status_code=202)
 async def user(id: int):
     found = False
     for index, saved_user in enumerate(users_list): ## Looking for user
