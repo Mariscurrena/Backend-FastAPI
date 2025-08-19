@@ -106,3 +106,18 @@ async def user(user: User):
         return {"error": "User has not been updated"}
     else:
         return user
+    
+
+###### DELETE Request
+@app.delete("/user/{id}")
+async def user(id: int):
+    found = False
+    for index, saved_user in enumerate(users_list): ## Looking for user
+        if saved_user.id == id: ## If condition meets
+            del users_list[index] ## User is deleted
+            found = True ## Logic condition changed
+
+    if not found:
+        return {"error": "User has not been deleted"}
+    else:
+        return {"warning": "User was deleted"}
