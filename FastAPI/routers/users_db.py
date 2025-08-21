@@ -10,18 +10,22 @@ router = APIRouter(prefix="/userdb",
 
 users_list = []
 
+#-READ ALL-###########################################################################################################################
 @router.get("/all", response_model=list[User]) ## Specify that I want to return a list of users as an expected response
 async def users():
     return users_schema(db_client.local.users.find())
 
+#-READ PATH-###########################################################################################################################
 @router.get("/{id}")
 async def user(id: str):
     return search_user("_id", ObjectId(id))
 
+#-READ QUERY-###########################################################################################################################
 @router.get("/")
 async def user(id: str):
     return search_user("_id", ObjectId(id))
-    
+
+#-CREATE USER-###########################################################################################################################
 @router.post("/", response_model=User, status_code=status.HTTP_201_CREATED) 
 async def user(user: User):
     if type(search_user("email", user.email)) == User:
@@ -37,34 +41,28 @@ async def user(user: User):
 
     return User(**new_user) ## Returns an user object
 
+#-UPDATE ALL USER-###########################################################################################################################
 @router.put("/", response_model=User, status_code=status.HTTP_202_ACCEPTED)
 async def user(user: User):
-    found = False ## Initial logic condition
-    for index, saved_user in enumerate(users_list): ## Looking for user
-        if saved_user.id == user.id: ## If condition meets
-            users_list[index] = user ## User is updated
-            found = True ## Logic condition changed
-
-    if not found: ## If logic condition not changed, user was not modified
-        raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail="User has not been updated")
-    else:
-        return user
+    user_dict = dict(user) #Transform user input into a dictionary for being handle by mongo
+    del user_dict["id"] #Delete ID because it can not change
+    try:
+        db_client.local.users.find_one_and_replace({"_id": ObjectId(user.id)}, user_dict) # Save user_dict, new parameter from user
+    except:
+        raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail="User has not been updated")   
     
-@router.delete("/{id}", status_code=status.HTTP_202_ACCEPTED)
-async def user(id: int):
-    found = False
-    for index, saved_user in enumerate(users_list): ## Looking for user
-        if saved_user.id == id: ## If condition meets
-            del users_list[index] ## User is deleted
-            found = True ## Logic condition changed
+    return search_user("_id", ObjectId(user.id))  
 
-    if not found:
+#-DELETE USER-########################################################################################################################### 
+@router.delete("/{id}", status_code=status.HTTP_204_NO_CONTENT)
+async def user(id: str):
+    found = db_client.local.users.find_one_and_delete({"_id": ObjectId(id)})
+
+    if not found: ## Mongo API returns deleted value when deleted successfully, so if not, found is empty and raise an error
         raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail="User has not been deleted")
-    else:
-        return {"warning": "User was deleted"}
     
 
-# Search function that validates if the user already exists
+# Search function that validates if the user already exists based on the given field type
 def search_user(field: str, key):  ## Performing a generic function to be able to reuse it
     try: 
         user = user_schema(db_client.local.users.find_one({field: key})) # Perform transformation based on search criteria
