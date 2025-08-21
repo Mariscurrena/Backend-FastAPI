@@ -1,4 +1,4 @@
-from fastapi import FastAPI, HTTPException, Depends, status
+from fastapi import APIRouter, HTTPException, Depends, status
 from pydantic import BaseModel
 from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
 from jose import jwt, JWTError
@@ -10,7 +10,7 @@ ALGORITHM = "HS256"
 ACCESS_TOKEN_DURATION = 1 ## An access_token has an expiration period associated
 SECRET = "ec9be770107c1414fc85f41c3c108d15d0b0b8f722c9ec3415ae4f04c5b7d8bc" # Proper way - openssl rand -hex 32 -> Useful for generate secrets
 
-app = FastAPI()
+router = APIRouter(tags=["JWT Auth"])
 oauth2 =  OAuth2PasswordBearer(tokenUrl="login")
 
 #Encryption context
@@ -52,11 +52,11 @@ def search_user(username: str):
     if username in users_db:
         return User(**users_db[username])
 
-# Validates auth with token and returns the decoded user data.
+# TOKEN VALIDATION PROCESS: Validates auth with token and returns the decoded user data.
 async def auth_user(token: str  = Depends(oauth2)): # Depends of the token given at "/login" endpoint
     ## Based on the token, it should be decoded in order to find the data
     exception = HTTPException(
-            status_code=status.HTTP_403_FORBIDDEN, 
+            status_code=status.HTTP_401_UNAUTHORIZED, 
             detail="Invalid Authentication - JWT Token", 
             headers={"WWW-Authenticate": "Bearer"}) 
     try:
@@ -78,7 +78,7 @@ async def current_user(user: User = Depends(auth_user)):
     return user
 
 
-@app.post("/login")
+@router.post("/login")
 async def login(form: OAuth2PasswordRequestForm = Depends()):
     user_db = users_db.get(form.username)
     if not user_db: 
@@ -100,6 +100,6 @@ async def login(form: OAuth2PasswordRequestForm = Depends()):
 
     return {"access_token": jwt.encode(access_token, SECRET, algorithm=ALGORITHM), "token_type": "bearer"} # jwt library allows to perform the encode and decode
 
-@app.get("/users/me")
+@router.get("/users/me")
 async def me(user: User = Depends(current_user)):
     return user
