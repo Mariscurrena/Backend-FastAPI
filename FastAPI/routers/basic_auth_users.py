@@ -4,7 +4,8 @@ from pydantic import BaseModel
 # OAuth2PasswordRequestForm - How the auth criteria will be send to the backend
 from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
 
-router = APIRouter(tags=["Basic Auth"])
+router = APIRouter(prefix="/basicauth",
+                    tags=["basicauth"])
 
 # Auth Instance
 oauth2 =  OAuth2PasswordBearer(tokenUrl="login")

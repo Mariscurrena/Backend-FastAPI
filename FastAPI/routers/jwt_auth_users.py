@@ -10,7 +10,8 @@ ALGORITHM = "HS256"
 ACCESS_TOKEN_DURATION = 1 ## An access_token has an expiration period associated
 SECRET = "ec9be770107c1414fc85f41c3c108d15d0b0b8f722c9ec3415ae4f04c5b7d8bc" # Proper way - openssl rand -hex 32 -> Useful for generate secrets
 
-router = APIRouter(tags=["JWT Auth"])
+router = APIRouter( prefix="/jwtauth",
+                    tags=["jwtauth"])
 oauth2 =  OAuth2PasswordBearer(tokenUrl="login")
 
 #Encryption context
